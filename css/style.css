@@ -4,18 +4,13 @@
   padding: 0;
   box-sizing: border-box;
 }
-/* Add this to your css/style.css file */
-body {
-  background-image: url('assets/background.jpg'); /* Path to your background image */
-  background-size: cover; /* Make sure the background covers the entire page */
-  background-repeat: no-repeat; /* Prevent the background from repeating */
-  background-attachment: fixed; /* Make the background fixed on scroll */
-}
+
 body {
   font-family: 'Inter', sans-serif;
   line-height: 1.6;
   color: #333;
-  background: #f8f9fa;
+  background: url('assets/background.jpg') no-repeat center center fixed; /* Path to your background image */
+  background-size: cover; /* Make sure the background covers the entire page */
 }
 
 .container {
