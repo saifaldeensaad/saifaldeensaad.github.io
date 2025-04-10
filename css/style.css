@@ -1,291 +1,515 @@
-// Wait for DOM to be fully loaded
-document.addEventListener('DOMContentLoaded', function() {
-  // ===== Current Year in Footer =====
-  document.getElementById('year').textContent = new Date().getFullYear();
+/* ===== CSS Variables for Theme Management ===== */
+:root {
+  /* Light Theme (Default) */
+  --primary-color: #4361ee;
+  --primary-dark: #3a56d4;
+  --secondary-color: #3f37c9;
+  --accent-color: #4cc9f0;
+  --text-color: #2b2d42;
+  --text-light: #8d99ae;
+  --background-color: #f8f9fa;
+  --card-bg: #ffffff;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --border-radius: 12px;
+  --max-width: 1400px;
+  --nav-height: 80px;
+  --section-padding: 8rem;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.18);
+}
 
-  // ===== Theme Toggle Functionality =====
-  const themeToggle = document.createElement('button');
-  themeToggle.id = 'theme-toggle';
-  themeToggle.className = 'theme-toggle';
-  themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
-  themeToggle.setAttribute('aria-label', 'Toggle dark mode');
-  document.body.appendChild(themeToggle);
+/* Dark Theme */
+[data-theme="dark"] {
+  --primary-color: #4895ef;
+  --primary-dark: #3a7bc8;
+  --secondary-color: #560bad;
+  --accent-color: #b5179e;
+  --text-color: #f8f9fa;
+  --text-light: #adb5bd;
+  --background-color: #121212;
+  --card-bg: #1e1e1e;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
+  --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+  --glass-bg: rgba(30, 30, 30, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
 
-  // Check for saved theme preference or use system preference
-  const savedTheme = localStorage.getItem('theme') || 
-                    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-  document.documentElement.setAttribute('data-theme', savedTheme);
-  updateThemeIcon(savedTheme);
+/* ===== Modern CSS Reset ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-  themeToggle.addEventListener('click', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    updateThemeIcon(newTheme);
-  });
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--nav-height);
+}
 
-  function updateThemeIcon(theme) {
-    const icon = themeToggle.querySelector('i');
-    icon.classList.toggle('fa-moon', theme === 'light');
-    icon.classList.toggle('fa-sun', theme === 'dark');
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.6;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  background-image: radial-gradient(circle at 25% 25%, rgba(var(--primary-color), 0.1) 0%, transparent 50%);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+}
+
+/* ===== Typography ===== */
+h1, h2, h3, h4 {
+  font-family: 'Playfair Display', serif;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin-bottom: 3rem;
+  position: relative;
+  display: inline-block;
+}
+
+h2::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -10px;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+  border-radius: 2px;
+}
+
+h3 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  margin-bottom: 1.5rem;
+  color: var(--primary-color);
+}
+
+p {
+  margin-bottom: 1.5rem;
+  color: var(--text-light);
+}
+
+/* ===== Layout Components ===== */
+.container {
+  width: min(100% - 3rem, var(--max-width));
+  margin-inline: auto;
+}
+
+.section {
+  padding: var(--section-padding) 0;
+  position: relative;
+}
+
+.section:nth-child(even) {
+  background-color: rgba(var(--primary-color), 0.03);
+}
+
+/* ===== Navigation ===== */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--nav-height);
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--glass-border);
+  z-index: 1000;
+  transition: var(--transition);
+}
+
+.navbar.scrolled {
+  box-shadow: var(--shadow);
+  height: calc(var(--nav-height) - 10px);
+}
+
+.navbar .container {
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo::before {
+  content: '';
+  display: block;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: var(--primary-color);
+  mask: url('assets/logo-icon.svg') no-repeat center;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-links a {
+  position: relative;
+  font-weight: 600;
+  color: var(--text-color);
+  transition: var(--transition);
+  padding: 0.5rem 0;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--primary-color);
+  transition: var(--transition);
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: var(--primary-color);
+}
+
+.nav-links a:hover::after,
+.nav-links a.active::after {
+  width: 100%;
+}
+
+/* Mobile Navigation */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 1001;
+}
+
+.bar {
+  display: block;
+  width: 25px;
+  height: 3px;
+  margin: 5px auto;
+  background-color: var(--text-color);
+  transition: var(--transition);
+}
+
+/* ===== Hero Section ===== */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding-top: var(--nav-height);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(var(--primary-color), 0.1) 0%, transparent 70%);
+  animation: pulse 15s infinite alternate;
+  z-index: -1;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.2); }
+}
+
+.hero-content {
+  display: flex;
+  align-items: center;
+  gap: 4rem;
+}
+
+.profile-picture {
+  width: min(100%, 350px);
+  aspect-ratio: 1/1;
+  border-radius: var(--border-radius);
+  object-fit: cover;
+  border: 5px solid var(--primary-color);
+  box-shadow: var(--shadow-hover);
+  transition: var(--transition);
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+.hero-text p {
+  font-size: 1.25rem;
+  max-width: 600px;
+}
+
+/* ===== Cards ===== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 2rem;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-10px);
+  box-shadow: var(--shadow-hover);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+}
+
+/* ===== Experience Timeline ===== */
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 0;
+  height: 100%;
+  width: 2px;
+  background: var(--primary-color);
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 2rem;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -2rem;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  border: 3px solid var(--background-color);
+}
+
+/* ===== Buttons ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  border-radius: 50px;
+  font-weight: 600;
+  transition: var(--transition);
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 15px rgba(var(--primary-color), 0.3);
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(var(--primary-color), 0.4);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+}
+
+/* ===== Dark Mode Toggle ===== */
+.theme-toggle {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: white;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  z-index: 1000;
+  transition: var(--transition);
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+}
+
+/* ===== Animations ===== */
+.animate {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== Accessibility ===== */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--primary-color);
+  color: white;
+  padding: 8px;
+  z-index: 100;
+  transition: transform 0.3s;
+}
+
+.skip-link:focus {
+  transform: translateY(40px);
+}
+
+.show-focus a:focus,
+.show-focus button:focus,
+.show-focus input:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.no-scroll {
+  overflow: hidden;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 992px) {
+  .hero-content {
+    flex-direction: column;
+    text-align: center;
   }
 
-  // ===== Mobile Menu Toggle =====
-  const hamburger = document.querySelector('.hamburger');
-  const navLinks = document.querySelector('.nav-links');
+  .profile-picture {
+    margin-bottom: 2rem;
+  }
+}
 
-  if (hamburger && navLinks) {
-    hamburger.addEventListener('click', function() {
-      this.classList.toggle('active');
-      navLinks.classList.toggle('active');
-      document.body.classList.toggle('no-scroll');
-      this.setAttribute('aria-expanded', this.classList.contains('active'));
-    });
-
-    // Close mobile menu when clicking on a link
-    document.querySelectorAll('.nav-links a').forEach(link => {
-      link.addEventListener('click', () => {
-        if (navLinks.classList.contains('active')) {
-          hamburger.classList.remove('active');
-          navLinks.classList.remove('active');
-          document.body.classList.remove('no-scroll');
-          hamburger.setAttribute('aria-expanded', 'false');
-        }
-      });
-    });
+@media (max-width: 768px) {
+  .hamburger {
+    display: block;
   }
 
-  // ===== Enhanced Smooth Scrolling =====
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-      // Skip if it's a non-section link
-      if (this.getAttribute('href') === '#' || 
-          this.classList.contains('external-link')) {
-        return;
-      }
-
-      e.preventDefault();
-      const targetId = this.getAttribute('href');
-      const targetElement = document.querySelector(targetId);
-      
-      if (targetElement) {
-        // Calculate scroll position with navbar offset
-        const navbarHeight = document.querySelector('.navbar').offsetHeight;
-        const additionalOffset = window.innerWidth < 768 ? 20 : 40; // More offset on mobile
-        const targetPosition = targetElement.getBoundingClientRect().top + 
-                              window.pageYOffset - 
-                              navbarHeight - 
-                              additionalOffset;
-
-        // Use native smooth scroll if available
-        if ('scrollBehavior' in document.documentElement.style) {
-          window.scrollTo({
-            top: targetPosition,
-            behavior: 'smooth'
-          });
-        } else {
-          // Polyfill for smooth scrolling
-          smoothScrollTo(targetPosition, 800);
-        }
-        
-        // Update URL without jumping
-        if (history.pushState) {
-          history.pushState(null, null, targetId);
-        } else {
-          window.location.hash = targetId;
-        }
-      }
-    });
-  });
-
-  // Smooth scroll polyfill
-  function smoothScrollTo(endY, duration) {
-    const startY = window.pageYOffset;
-    const distance = endY - startY;
-    const startTime = performance.now();
-
-    function step(currentTime) {
-      const elapsedTime = currentTime - startTime;
-      const progress = Math.min(elapsedTime / duration, 1);
-      const easeProgress = easeInOutCubic(progress);
-      
-      window.scrollTo(0, startY + (distance * easeProgress));
-      
-      if (progress < 1) {
-        requestAnimationFrame(step);
-      }
-    }
-
-    function easeInOutCubic(t) {
-      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    }
-
-    requestAnimationFrame(step);
+  .nav-links {
+    position: fixed;
+    top: var(--nav-height);
+    left: -100%;
+    width: 100%;
+    height: calc(100vh - var(--nav-height));
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    transition: var(--transition);
   }
 
-  // ===== Sticky Navigation with Scroll Direction Detection =====
-  const navbar = document.querySelector('.navbar');
-  let lastScrollPosition = window.pageYOffset;
-  let ticking = false;
-  
-  function updateNavbar() {
-    const currentScrollPosition = window.pageYOffset;
-    
-    if (currentScrollPosition > 50) {
-      navbar.classList.add('scrolled');
-      
-      // Hide navbar when scrolling down, show when scrolling up
-      if (currentScrollPosition > lastScrollPosition && currentScrollPosition > 100) {
-        navbar.style.transform = 'translateY(-100%)';
-      } else {
-        navbar.style.transform = 'translateY(0)';
-      }
-    } else {
-      navbar.classList.remove('scrolled');
-      navbar.style.transform = 'translateY(0)';
-    }
-    
-    lastScrollPosition = currentScrollPosition;
-    ticking = false;
+  .nav-links.active {
+    left: 0;
   }
 
-  // Throttle scroll events with requestAnimationFrame
-  window.addEventListener('scroll', function() {
-    if (!ticking) {
-      window.requestAnimationFrame(updateNavbar);
-      ticking = true;
-    }
-  });
-
-  // ===== Active Section Highlighting =====
-  const sections = document.querySelectorAll('section');
-  const navItems = document.querySelectorAll('.nav-links a');
-
-  function updateActiveSection() {
-    let currentSection = '';
-    
-    sections.forEach(section => {
-      const sectionTop = section.offsetTop;
-      const sectionHeight = section.offsetHeight;
-      const sectionId = section.getAttribute('id');
-      
-      if (window.pageYOffset >= (sectionTop - 200) && 
-          window.pageYOffset < (sectionTop + sectionHeight - 200)) {
-        currentSection = sectionId;
-      }
-    });
-    
-    navItems.forEach(item => {
-      item.classList.remove('active');
-      if (item.getAttribute('href') === `#${currentSection}`) {
-        item.classList.add('active');
-      }
-    });
+  .hamburger.active .bar:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
   }
 
-  // Run once on load and then on scroll
-  updateActiveSection();
-  window.addEventListener('scroll', updateActiveSection);
-
-  // ===== Intersection Observer for Animations =====
-  const animateOnScroll = (elements, options) => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('animate');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, options);
-
-    elements.forEach(el => observer.observe(el));
-  };
-
-  // Configure animation triggers
-  animateOnScroll(document.querySelectorAll('.card, .hero-content, section'), {
-    threshold: 0.1,
-    rootMargin: '0px 0px -100px 0px'
-  });
-
-  // ===== Accessibility Improvements =====
-  // Show focus outlines when tabbing
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Tab') {
-      document.body.classList.add('show-focus');
-    }
-  });
-
-  document.addEventListener('mousedown', function() {
-    document.body.classList.remove('show-focus');
-  });
-
-  // Skip to content button
-  const skipLink = document.createElement('a');
-  skipLink.href = '#main-content';
-  skipLink.className = 'skip-link';
-  skipLink.textContent = 'Skip to main content';
-  document.body.insertBefore(skipLink, document.body.firstChild);
-
-  // ===== Project Card Hover Effects =====
-  document.querySelectorAll('.card').forEach(card => {
-    card.addEventListener('mousemove', (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      const angleX = (y - centerY) / 20;
-      const angleY = (centerX - x) / 20;
-      
-      card.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg)`;
-    });
-
-    card.addEventListener('mouseleave', () => {
-      card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
-    });
-  });
-
-  // ===== Contact Form Validation =====
-  const contactForm = document.querySelector('#contact-form');
-  if (contactForm) {
-    contactForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      // Add form validation logic here
-      console.log('Form submitted!');
-    });
+  .hamburger.active .bar:nth-child(2) {
+    opacity: 0;
   }
 
-  // ===== Lazy Loading for Images =====
-  if ('loading' in HTMLImageElement.prototype) {
-    // Native lazy loading supported
-    document.querySelectorAll('img[loading="lazy"]').forEach(img => {
-      img.src = img.dataset.src;
-    });
-  } else {
-    // Fallback with Intersection Observer
-    const lazyImages = document.querySelectorAll('img[loading="lazy"]');
-    const lazyObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const img = entry.target;
-          img.src = img.dataset.src;
-          lazyObserver.unobserve(img);
-        }
-      });
-    });
-
-    lazyImages.forEach(img => lazyObserver.observe(img));
+  .hamburger.active .bar:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
   }
-});
+}
 
-// ===== Service Worker Registration (PWA) =====
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then(registration => {
-      console.log('ServiceWorker registration successful');
-    }).catch(err => {
-      console.log('ServiceWorker registration failed: ', err);
-    });
-  });
+/* ===== Reduced Motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ===== Print Styles ===== */
+@media print {
+  .navbar, .theme-toggle, footer {
+    display: none;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .section {
+    padding: 1rem 0 !important;
+    page-break-inside: avoid;
+  }
+
+  a::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    font-weight: normal;
+  }
 }
